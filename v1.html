@@ -1,0 +1,1898 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="RoutineLab - 화장품 하나가 아니라, 당신의 하루 루틴을 분석합니다." />
+  <title>RoutineLab | AI 화장품 루틴 분석</title>
+
+  <style>
+    :root {
+      --bg: #f7f7f4;
+      --surface: #ffffff;
+      --surface-soft: #f1f3ee;
+      --text: #1d2824;
+      --muted: #6f7d77;
+      --line: #dfe6e1;
+      --primary: #2d6a4f;
+      --primary-dark: #1f513b;
+      --primary-soft: #dff2e8;
+      --accent: #d7ecff;
+      --warning: #fff3c7;
+      --shadow: 0 18px 50px rgba(30, 54, 43, 0.08);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+      --max: 1180px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 90% 0%, rgba(215, 236, 255, 0.75), transparent 34%),
+        radial-gradient(circle at 10% 10%, rgba(223, 242, 232, 0.9), transparent 30%),
+        var(--bg);
+      line-height: 1.6;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .container {
+      width: min(calc(100% - 40px), var(--max));
+      margin: 0 auto;
+    }
+
+    .section {
+      padding: 110px 0;
+      scroll-margin-top: 86px;
+    }
+
+    .eyebrow {
+      margin: 0 0 14px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--primary);
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      line-height: 1.12;
+      letter-spacing: -0.04em;
+    }
+
+    .section-copy {
+      max-width: 720px;
+      margin: 20px 0 0;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(223, 230, 225, 0.95);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+    }
+
+    .placeholder {
+      border: 1.5px dashed #b9c7c0;
+      background: rgba(255,255,255,0.56);
+      color: #85918c;
+      border-radius: var(--radius-lg);
+      display: grid;
+      place-items: center;
+      min-height: 260px;
+      text-align: center;
+      padding: 24px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .placeholder small {
+      display: block;
+      margin-top: 8px;
+      font-weight: 500;
+      color: #9ca7a2;
+    }
+
+    /* Header */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(16px);
+      background: rgba(247, 247, 244, 0.82);
+      border-bottom: 1px solid rgba(223, 230, 225, 0.75);
+    }
+
+    .nav {
+      min-height: 74px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      font-size: 1.18rem;
+    }
+
+    .brand-mark {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      background: var(--primary);
+      color: white;
+      font-size: 0.72rem;
+      overflow: hidden;
+    }
+
+    .brand-mark span {
+      font-size: 0.62rem;
+      white-space: nowrap;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      font-size: 0.94rem;
+      color: #4d5a55;
+      font-weight: 700;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 13px 20px;
+      font-weight: 800;
+      transition: 0.2s ease;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 10px 24px rgba(45, 106, 79, 0.22);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      background: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .menu-button {
+      display: none;
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--line);
+      background: white;
+      border-radius: 12px;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    /* Hero */
+    .hero {
+      padding: 86px 0 90px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.08fr 0.92fr;
+      gap: 58px;
+      align-items: center;
+    }
+
+    .hero h1 {
+      max-width: 720px;
+      margin: 0;
+      font-size: clamp(3rem, 6.5vw, 5.7rem);
+      line-height: 0.98;
+      letter-spacing: -0.07em;
+    }
+
+    .hero h1 span {
+      display: block;
+      color: var(--primary);
+    }
+
+    .hero-subtitle {
+      max-width: 640px;
+      margin: 28px 0 0;
+      font-size: clamp(1.05rem, 2vw, 1.35rem);
+      color: var(--muted);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 34px;
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 28px;
+    }
+
+    .pill {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.78);
+      border: 1px solid var(--line);
+      color: #57665f;
+      font-size: .85rem;
+      font-weight: 700;
+    }
+
+    .hero-visual {
+      min-height: 530px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-visual::before,
+    .hero-visual::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      filter: blur(2px);
+      opacity: .8;
+    }
+
+    .hero-visual::before {
+      width: 240px;
+      height: 240px;
+      right: -70px;
+      top: -70px;
+      background: var(--accent);
+    }
+
+    .hero-visual::after {
+      width: 210px;
+      height: 210px;
+      left: -80px;
+      bottom: -80px;
+      background: var(--primary-soft);
+    }
+
+    .hero-visual .placeholder {
+      min-height: 530px;
+      position: relative;
+      z-index: 2;
+      background: rgba(255,255,255,.66);
+    }
+
+    /* Problem */
+    .problem-wrap {
+      display: grid;
+      grid-template-columns: .9fr 1.1fr;
+      gap: 44px;
+      align-items: center;
+    }
+
+    .problem-stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .product-search-card {
+      padding: 20px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .product-search-card strong {
+      display: block;
+      font-size: 1rem;
+    }
+
+    .product-search-card span {
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    .product-card-actions {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ingredient-search-button,
+    .product-delete-button {
+      border: 1px solid #c7d8cf;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: .78rem;
+      font-weight: 900;
+      transition: .18s ease;
+    }
+
+    .ingredient-search-button {
+      background: var(--primary-soft);
+      color: var(--primary-dark);
+    }
+
+    .ingredient-search-button:hover {
+      transform: translateY(-1px);
+      background: #cfe9dc;
+      border-color: #abc8b9;
+    }
+
+    .product-delete-button {
+      background: #fff;
+      color: #8b4b4b;
+      border-color: #ead2d2;
+    }
+
+    .product-delete-button:hover {
+      transform: translateY(-1px);
+      background: #fff1f1;
+      border-color: #ddbaba;
+    }
+
+    .added-product-card {
+      animation: rise .28s ease;
+    }
+
+    .add-product-box {
+      padding: 18px;
+      background: rgba(255,255,255,.76);
+      border: 1.5px dashed #b9c7c0;
+      border-radius: var(--radius-lg);
+    }
+
+    .add-product-box label {
+      display: block;
+      margin-bottom: 10px;
+      font-size: .88rem;
+      font-weight: 800;
+      color: #53635c;
+    }
+
+    .add-product-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+    }
+
+    .add-product-row input {
+      width: 100%;
+      min-width: 0;
+      padding: 13px 14px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: white;
+      color: var(--text);
+      outline: none;
+    }
+
+    .add-product-row input:focus {
+      border-color: #8eb4a1;
+      box-shadow: 0 0 0 3px rgba(45,106,79,.10);
+    }
+
+    .add-product-help {
+      margin: 9px 0 0;
+      color: var(--muted);
+      font-size: .78rem;
+    }
+
+    .add-product-message {
+      min-height: 20px;
+      margin: 8px 0 0;
+      font-size: .78rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+
+    .ingredient-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(15, 28, 22, .52);
+      backdrop-filter: blur(8px);
+    }
+
+    .ingredient-modal.show {
+      display: flex;
+    }
+
+    .ingredient-modal-dialog {
+      width: min(100%, 620px);
+      max-height: min(78vh, 720px);
+      overflow: auto;
+      padding: 28px;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: 0 24px 70px rgba(14, 35, 25, .24);
+      animation: rise .22s ease;
+    }
+
+    .ingredient-modal-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .ingredient-modal-head h3 {
+      margin: 5px 0 0;
+      font-size: 1.35rem;
+      line-height: 1.3;
+    }
+
+    .modal-kicker {
+      margin: 0;
+      color: var(--primary);
+      font-size: .76rem;
+      font-weight: 900;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .modal-close {
+      width: 40px;
+      height: 40px;
+      flex: 0 0 auto;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #f8faf8;
+      color: var(--text);
+      font-size: 1.35rem;
+      line-height: 1;
+    }
+
+    .ingredient-modal-body {
+      padding-top: 22px;
+    }
+
+    .ingredient-modal-body h4 {
+      margin: 0 0 10px;
+      font-size: .88rem;
+      color: #617169;
+    }
+
+    .ingredient-text {
+      margin: 0;
+      padding: 18px;
+      border-radius: 16px;
+      background: var(--surface-soft);
+      color: #37473f;
+      line-height: 1.8;
+      word-break: keep-all;
+    }
+
+    .ingredient-source-note {
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: .78rem;
+    }
+
+    body.modal-open {
+      overflow: hidden;
+    }
+
+    .question-card {
+      margin-top: 8px;
+      padding: 26px;
+      background: var(--text);
+      color: white;
+      border-radius: var(--radius-lg);
+    }
+
+    .question-card strong {
+      display: block;
+      font-size: 1.25rem;
+      margin-bottom: 8px;
+    }
+
+    /* How */
+    .steps {
+      margin-top: 44px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+    }
+
+    .step {
+      position: relative;
+      padding: 28px 24px 26px;
+      min-height: 220px;
+    }
+
+    .step-number {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-weight: 900;
+      margin-bottom: 34px;
+    }
+
+    .step h3 {
+      margin: 0 0 8px;
+      font-size: 1.15rem;
+    }
+
+    .step p {
+      margin: 0;
+      color: var(--muted);
+      font-size: .93rem;
+    }
+
+    .compatibility-basis {
+      margin-top: 24px;
+      padding: 26px;
+      background: rgba(255,255,255,.84);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+    }
+
+    .compatibility-basis-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 20px;
+      margin-bottom: 18px;
+    }
+
+    .compatibility-basis-head h3 {
+      margin: 0;
+      font-size: 1.22rem;
+    }
+
+    .compatibility-basis-head p {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    .score-note {
+      flex: 0 0 auto;
+      padding: 8px 11px;
+      border-radius: 999px;
+      background: var(--warning);
+      color: #756321;
+      font-size: .74rem;
+      font-weight: 900;
+    }
+
+    .score-basis-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .score-basis-item {
+      padding: 16px;
+      background: var(--surface-soft);
+      border-radius: 14px;
+    }
+
+    .score-basis-item strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: .9rem;
+    }
+
+    .score-basis-item span {
+      display: block;
+      color: var(--muted);
+      font-size: .8rem;
+      line-height: 1.55;
+    }
+
+    .score-example {
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-left: 4px solid var(--primary);
+      border-radius: 0 12px 12px 0;
+      background: #f7faf8;
+      color: #52615a;
+      font-size: .84rem;
+    }
+
+    .score-example b {
+      color: var(--text);
+    }
+
+    /* Demo */
+    .demo-shell {
+      margin-top: 44px;
+      padding: 28px;
+    }
+
+    .demo-header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .demo-header h3 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    .demo-header p {
+      margin: 6px 0 0;
+      color: var(--muted);
+    }
+
+    .routine-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+    }
+
+    .routine-column {
+      padding: 20px;
+      background: var(--surface-soft);
+      border-radius: var(--radius-lg);
+    }
+
+    .routine-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .routine-label strong {
+      font-size: 1.05rem;
+    }
+
+    .routine-label span {
+      color: var(--muted);
+      font-size: .85rem;
+    }
+
+    .product-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .product-option {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 14px;
+      align-items: center;
+      padding: 14px;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      cursor: pointer;
+      transition: .18s ease;
+    }
+
+    .product-option:hover {
+      transform: translateY(-1px);
+      border-color: #b8c9c0;
+    }
+
+    .product-option input {
+      accent-color: var(--primary);
+      width: 18px;
+      height: 18px;
+    }
+
+    .product-option strong {
+      display: block;
+      font-size: .94rem;
+    }
+
+    .product-option small {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: .78rem;
+    }
+
+    .badge {
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary-dark);
+      font-size: .72rem;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .demo-action {
+      display: flex;
+      justify-content: center;
+      margin-top: 26px;
+    }
+
+    /* Result */
+    .result-panel {
+      display: none;
+      margin-top: 26px;
+      padding: 28px;
+    }
+
+    .result-panel.show {
+      display: block;
+      animation: rise .35s ease;
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .score-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+    }
+
+    .score-card {
+      padding: 22px;
+      background: var(--surface-soft);
+      border-radius: var(--radius-md);
+    }
+
+    .score-card span {
+      display: block;
+      color: var(--muted);
+      font-size: .82rem;
+      font-weight: 700;
+    }
+
+    .score-card strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 1.7rem;
+      letter-spacing: -0.04em;
+    }
+
+    .ingredient-table {
+      width: 100%;
+      margin-top: 24px;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 14px;
+    }
+
+    .ingredient-table th,
+    .ingredient-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      font-size: .9rem;
+    }
+
+    .ingredient-table th {
+      background: #f7faf8;
+      color: #607069;
+    }
+
+    .insight {
+      margin-top: 24px;
+      padding: 22px;
+      background: #f9fbff;
+      border: 1px solid #dde8f2;
+      border-radius: 16px;
+    }
+
+    .insight h4 {
+      margin: 0 0 10px;
+      font-size: .92rem;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      color: #47708e;
+    }
+
+    .insight p {
+      margin: 0;
+      color: #4c5d67;
+    }
+
+    .disclaimer {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: var(--warning);
+      color: #756321;
+      font-size: .82rem;
+    }
+
+    /* Difference */
+    .difference-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-top: 40px;
+    }
+
+    .compare-card {
+      padding: 30px;
+      min-height: 270px;
+    }
+
+    .compare-card h3 {
+      margin: 0 0 20px;
+      font-size: 1.2rem;
+    }
+
+    .compare-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .compare-list div {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      color: var(--muted);
+    }
+
+    .compare-list b {
+      color: var(--text);
+    }
+
+    .compare-card.highlight {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .compare-card.highlight .compare-list div,
+    .compare-card.highlight .compare-list b {
+      color: white;
+    }
+
+    /* CTA */
+    .cta-panel {
+      padding: 64px;
+      text-align: center;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(215,236,255,.9), transparent 35%),
+        radial-gradient(circle at 80% 100%, rgba(223,242,232,.95), transparent 40%),
+        white;
+    }
+
+    .cta-panel h2 {
+      margin: 0 auto;
+      max-width: 760px;
+      font-size: clamp(2.1rem, 5vw, 4.5rem);
+      line-height: 1.05;
+      letter-spacing: -0.06em;
+    }
+
+    .cta-panel p {
+      max-width: 640px;
+      margin: 20px auto 28px;
+      color: var(--muted);
+    }
+
+    /* Footer */
+    footer {
+      padding: 34px 0 46px;
+      color: #65716c;
+      font-size: .88rem;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 30px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .null-inline {
+      color: #98a39e;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: #eef2ef;
+    }
+
+    /* Mobile */
+    @media (max-width: 960px) {
+      .nav-links {
+        display: none;
+        position: absolute;
+        top: 74px;
+        left: 20px;
+        right: 20px;
+        padding: 18px;
+        flex-direction: column;
+        align-items: stretch;
+        background: white;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+      }
+
+      .nav-links.open {
+        display: flex;
+      }
+
+      .nav-actions .btn-primary {
+        display: none;
+      }
+
+      .menu-button {
+        display: inline-flex;
+      }
+
+      .hero-grid,
+      .problem-wrap,
+      .difference-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-visual {
+        min-height: 360px;
+      }
+
+      .hero-visual .placeholder {
+        min-height: 360px;
+      }
+
+      .steps {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .score-basis-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 720px) {
+      .container {
+        width: min(calc(100% - 28px), var(--max));
+      }
+
+      .section {
+        padding: 76px 0;
+      }
+
+      .hero {
+        padding: 56px 0 70px;
+      }
+
+      .hero h1 {
+        font-size: clamp(2.7rem, 13vw, 4.2rem);
+      }
+
+      .hero-grid {
+        gap: 34px;
+      }
+
+      .steps,
+      .routine-columns,
+      .score-grid,
+      .footer-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .demo-shell,
+      .result-panel {
+        padding: 18px;
+      }
+
+      .demo-header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .ingredient-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+
+      .add-product-row {
+        grid-template-columns: 1fr;
+      }
+
+      .add-product-row .btn {
+        width: 100%;
+      }
+
+      .product-search-card {
+        align-items: flex-start;
+      }
+
+      .product-card-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .ingredient-search-button,
+      .product-delete-button {
+        width: 100%;
+      }
+
+      .compatibility-basis-head {
+        flex-direction: column;
+      }
+
+      .score-basis-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .ingredient-modal-dialog {
+        padding: 22px 18px;
+      }
+
+      .cta-panel {
+        padding: 46px 20px;
+      }
+
+      .footer-links {
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!--
+    ==========================================================
+    USER-SUPPLIED CONTENT SLOTS (현재 null)
+    {{A}} : 브랜드 로고 이미지/아이콘
+    {{B}} : HERO 대표 비주얼 또는 서비스 목업 이미지
+    {{C}} : 푸터 연락처/문의 정보
+    {{D}} : 개인정보처리방침 URL
+    {{E}} : 이용약관 URL
+    ==========================================================
+  -->
+
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="#top" aria-label="RoutineLab 홈">
+        <div class="brand-mark" id="brandMark"><span>{{A}}</span></div>
+        <span>RoutineLab</span>
+      </a>
+
+      <nav class="nav-links" id="navLinks" aria-label="주요 메뉴">
+        <a href="#problem">문제 정의</a>
+        <a href="#how">분석 방법</a>
+        <a href="#demo">Live Demo</a>
+        <a href="#difference">차별점</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="btn btn-primary" data-scroll="#demo">내 루틴 분석하기</button>
+        <button class="menu-button" id="menuButton" aria-label="모바일 메뉴 열기">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <p class="eyebrow">AI-powered skincare routine analysis</p>
+          <h1>
+            오늘 바른 화장품,
+            <span>정말 같이 써도 될까요?</span>
+          </h1>
+
+          <p class="hero-subtitle">
+            화장품 하나가 아니라, 당신의 하루 루틴을 분석합니다.
+            AM/PM 전체에서 반복되는 주요 성분과 루틴 조합을 한눈에 확인해보세요.
+          </p>
+
+          <div class="hero-actions">
+            <button class="btn btn-primary" data-scroll="#demo">내 루틴 분석하기</button>
+            <button class="btn btn-secondary" data-scroll="#how">분석 방법 보기</button>
+          </div>
+
+          <div class="hero-meta" aria-label="서비스 특징">
+            <span class="pill">AM / PM Routine</span>
+            <span class="pill">Ingredient Check</span>
+            <span class="pill">Exposure Check</span>
+            <span class="pill">Analysis Confidence</span>
+          </div>
+        </div>
+
+        <div class="hero-visual card">
+          <div class="placeholder">
+            <div>
+              {{B}}
+              <small>브랜드에 맞는 HERO 이미지 / 서비스 목업 이미지 영역</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROBLEM -->
+    <section class="section" id="problem">
+      <div class="container problem-wrap">
+        <div>
+          <p class="eyebrow">Problem</p>
+          <h2 class="section-title">
+            제품 하나는 검색할 수 있습니다.<br />
+            하지만 여러 제품을 함께 쓴다면?
+          </h2>
+          <p class="section-copy">
+            실제 스킨케어는 세럼, 크림, 선크림, 앰플처럼 여러 제품을 연속해서 사용합니다.
+            RoutineLab은 개별 제품이 아니라 하루 전체 루틴에서 무엇이 반복되는지 확인합니다.
+          </p>
+        </div>
+
+        <div class="problem-stack" id="problemProductStack">
+          <div class="product-search-card card" data-problem-product="이니스프리 비타민C 세럼">
+            <div>
+              <strong><span class="problem-product-label">제품 A</span> · <span class="problem-product-name">이니스프리 비타민C 세럼</span></strong>
+              <span>엑셀 데이터의 주성분 정보 확인</span>
+            </div>
+            <div class="product-card-actions">
+              <button class="ingredient-search-button" type="button" data-show-ingredients="이니스프리 비타민C 세럼">검색 가능</button>
+              <button class="product-delete-button" type="button" data-delete-product>삭제</button>
+            </div>
+          </div>
+
+          <div class="product-search-card card" data-problem-product="디오디너리 나이아신아마이드+징크 세럼">
+            <div>
+              <strong><span class="problem-product-label">제품 B</span> · <span class="problem-product-name">디오디너리 나이아신아마이드+징크 세럼</span></strong>
+              <span>엑셀 데이터의 주성분 정보 확인</span>
+            </div>
+            <div class="product-card-actions">
+              <button class="ingredient-search-button" type="button" data-show-ingredients="디오디너리 나이아신아마이드+징크 세럼">검색 가능</button>
+              <button class="product-delete-button" type="button" data-delete-product>삭제</button>
+            </div>
+          </div>
+
+          <div class="product-search-card card" data-problem-product="이니스프리 레티놀 그린티 PDRN 앰플">
+            <div>
+              <strong><span class="problem-product-label">제품 C</span> · <span class="problem-product-name">이니스프리 레티놀 그린티 PDRN 앰플</span></strong>
+              <span>엑셀 데이터의 주성분 정보 확인</span>
+            </div>
+            <div class="product-card-actions">
+              <button class="ingredient-search-button" type="button" data-show-ingredients="이니스프리 레티놀 그린티 PDRN 앰플">검색 가능</button>
+              <button class="product-delete-button" type="button" data-delete-product>삭제</button>
+            </div>
+          </div>
+
+          <div class="add-product-box" id="addProductBox">
+            <label for="newProblemProduct">+ 새로운 제품 추가</label>
+            <div class="add-product-row">
+              <input
+                id="newProblemProduct"
+                type="text"
+                list="productSuggestions"
+                placeholder="제품명을 입력하거나 목록에서 선택하세요"
+                autocomplete="off"
+              />
+              <button class="btn btn-secondary" id="addProblemProductButton" type="button">제품 추가</button>
+            </div>
+            <datalist id="productSuggestions"></datalist>
+            <p class="add-product-help">첨부 엑셀에 등록된 제품은 추가 후 ‘검색 가능’ 버튼으로 주성분을 확인할 수 있습니다.</p>
+            <p class="add-product-message" id="addProductMessage" aria-live="polite"></p>
+          </div>
+
+          <div class="question-card">
+            <strong id="problemQuestion">A + B + C를 함께 사용하면?</strong>
+            <span>“그래서 나는 어떻게 써야 하지?”</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="section" id="how">
+      <div class="container">
+        <p class="eyebrow">How it works</p>
+        <h2 class="section-title">네 단계로 확인하는 나의 하루 루틴</h2>
+        <p class="section-copy">
+          제품 입력부터 성분 표준화, 중복 확인, 루틴 결과까지 순서대로 보여줍니다.
+        </p>
+
+        <div class="steps">
+          <article class="step card">
+            <div class="step-number">01</div>
+            <h3>Routine Input</h3>
+            <p>AM과 PM으로 나누어 현재 사용하는 제품을 선택합니다.</p>
+          </article>
+
+          <article class="step card">
+            <div class="step-number">02</div>
+            <h3>Ingredient Check</h3>
+            <p>성분명을 표준화하고 동일 성분의 다른 표기를 하나로 통합합니다.</p>
+          </article>
+
+          <article class="step card">
+            <div class="step-number">03</div>
+            <h3>Exposure Check</h3>
+            <p>하루 루틴에서 동일 성분이 몇 개 제품에서 반복되는지 확인합니다.</p>
+          </article>
+
+          <article class="step card">
+            <div class="step-number">04</div>
+            <h3>Routine Compatibility</h3>
+            <p>Routine Score, 분석 신뢰도와 사용자 친화적인 설명을 제공합니다.</p>
+          </article>
+        </div>
+
+        <div class="compatibility-basis">
+          <div class="compatibility-basis-head">
+            <div>
+              <h3>Routine Compatibility Score는 무엇을 보나요?</h3>
+              <p>
+                사업계획서의 88/100은 의학적·독성학적 안전 점수가 아니라 데모 UX를 위한 휴리스틱 예시입니다.
+                문서에는 항목별 고정 배점이나 감점 공식은 정의되어 있지 않으므로, 아래에는 문서가 실제로 제시한 판단 근거를 공개합니다.
+              </p>
+            </div>
+            <span class="score-note">Demo heuristic · 안전성 점수 아님</span>
+          </div>
+
+          <div class="score-basis-grid">
+            <div class="score-basis-item">
+              <strong>① AM/PM 활성성분 분리</strong>
+              <span>비타민C 계열과 나이아신아마이드처럼 확인이 필요한 활성성분이 시간대별로 분리되어 있는지 봅니다.</span>
+            </div>
+            <div class="score-basis-item">
+              <strong>② 활성성분 중복</strong>
+              <span>같은 활성성분이 여러 제품에서 반복되는지 확인하고, 중복이 있으면 ‘주의’ 요소로 설명합니다.</span>
+            </div>
+            <div class="score-basis-item">
+              <strong>③ 명확한 충돌 여부</strong>
+              <span>현재 입력 데이터에서 명확한 주의 조합이 확인되는지 봅니다. 확인되지 않았다고 해서 ‘안전 판정’을 의미하지는 않습니다.</span>
+            </div>
+            <div class="score-basis-item">
+              <strong>④ 데이터 완전성 / Confidence</strong>
+              <span>정확한 제품 버전, 성분 농도, 전체 성분 정보가 부족하면 분석 신뢰도를 낮추고 보수적으로 안내합니다.</span>
+            </div>
+          </div>
+
+          <div class="score-example">
+            <b>문서의 88점 예시:</b>
+            AM/PM으로 활성성분이 분리된 점은 긍정적이지만, PM에서 나이아신아마이드가 중복되고 레티놀 제품의 정확한 버전·농도가 불완전해
+            최종 결과를 <b>88 / 100 · Exposure 보통 · Confidence 중간</b>으로 제시합니다.
+            정확한 수치 가중치는 사업계획서에서 아직 확정하지 않았습니다.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LIVE DEMO -->
+    <section class="section" id="demo">
+      <div class="container">
+        <p class="eyebrow">Live Demo</p>
+        <h2 class="section-title">박지우님의 오늘 루틴</h2>
+        <p class="section-copy">
+          미리 준비된 6개 제품을 선택해 RoutineLab의 핵심 흐름을 체험할 수 있습니다.
+        </p>
+
+        <div class="demo-shell card">
+          <div class="demo-header">
+            <div>
+              <h3>AM / PM Routine</h3>
+              <p id="selectionSummary">AM 3개 / PM 3개 선택</p>
+            </div>
+            <span class="badge">MVP Demo</span>
+          </div>
+
+          <div class="routine-columns">
+            <section class="routine-column">
+              <div class="routine-label">
+                <strong>AM ROUTINE</strong>
+                <span>Morning</span>
+              </div>
+              <div class="product-list" id="amProducts"></div>
+            </section>
+
+            <section class="routine-column">
+              <div class="routine-label">
+                <strong>PM ROUTINE</strong>
+                <span>Evening</span>
+              </div>
+              <div class="product-list" id="pmProducts"></div>
+            </section>
+          </div>
+
+          <div class="demo-action">
+            <button class="btn btn-primary" id="analyzeButton">AI 루틴 분석하기</button>
+          </div>
+        </div>
+
+        <div class="result-panel card" id="resultPanel">
+          <div class="score-grid">
+            <div class="score-card">
+              <span>Routine Compatibility</span>
+              <strong id="scoreValue">88 / 100</strong>
+            </div>
+            <div class="score-card">
+              <span>Exposure Level</span>
+              <strong id="exposureValue">보통</strong>
+            </div>
+            <div class="score-card">
+              <span>Analysis Confidence</span>
+              <strong id="confidenceValue">중간</strong>
+            </div>
+          </div>
+
+          <table class="ingredient-table" aria-label="중복 성분 분석 결과">
+            <thead>
+              <tr>
+                <th>표준화 성분</th>
+                <th>발견 제품 수</th>
+                <th>Exposure Level</th>
+                <th>해석</th>
+              </tr>
+            </thead>
+            <tbody id="ingredientRows"></tbody>
+          </table>
+
+          <div class="insight">
+            <h4>AI Routine Insight</h4>
+            <p id="insightText"></p>
+          </div>
+
+          <div class="disclaimer">
+            ※ 이 데모의 Exposure Level은 독성학적 안전·위험 판정이 아니라, 하루 루틴에서 동일 성분이 반복되는 정도를 보여주는 UX 지표입니다.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIFFERENCE -->
+    <section class="section" id="difference">
+      <div class="container">
+        <p class="eyebrow">Difference</p>
+        <h2 class="section-title">
+          제품 하나의 점수가 아니라<br />
+          “내 하루 루틴”을 분석합니다.
+        </h2>
+
+        <div class="difference-grid">
+          <article class="compare-card card">
+            <h3>기존 제품 단위 정보</h3>
+            <div class="compare-list">
+              <div>• <span><b>분석 단위</b> — 개별 제품</span></div>
+              <div>• <span><b>핵심 질문</b> — 이 제품의 성분은 무엇인가?</span></div>
+              <div>• <span><b>결과</b> — 성분표와 단일 제품 정보</span></div>
+              <div>• <span><b>한계</b> — 여러 제품을 함께 사용할 때 다시 비교해야 함</span></div>
+            </div>
+          </article>
+
+          <article class="compare-card card highlight">
+            <h3>RoutineLab</h3>
+            <div class="compare-list">
+              <div>• <span><b>분석 단위</b> — AM/PM 하루 전체 루틴</span></div>
+              <div>• <span><b>핵심 질문</b> — 어떤 성분이 반복되고 있는가?</span></div>
+              <div>• <span><b>결과</b> — Exposure Level + Routine Score</span></div>
+              <div>• <span><b>차별점</b> — 분석 결과와 함께 Confidence 표시</span></div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="section">
+      <div class="container">
+        <div class="cta-panel card">
+          <p class="eyebrow">Try RoutineLab</p>
+          <h2>당신의 화장대에도<br />중복된 성분이 있을까요?</h2>
+          <p>
+            지금 사용하는 AM/PM 루틴을 선택하고 어떤 성분이 반복되는지 확인해보세요.
+          </p>
+          <button class="btn btn-primary" data-scroll="#demo">지금 확인하기</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- PRODUCT INGREDIENT MODAL -->
+  <div class="ingredient-modal" id="ingredientModal" role="dialog" aria-modal="true" aria-labelledby="ingredientModalTitle">
+    <div class="ingredient-modal-dialog">
+      <div class="ingredient-modal-head">
+        <div>
+          <p class="modal-kicker">Main Ingredients</p>
+          <h3 id="ingredientModalTitle">제품명</h3>
+        </div>
+        <button class="modal-close" id="ingredientModalClose" type="button" aria-label="팝업 닫기">×</button>
+      </div>
+      <div class="ingredient-modal-body">
+        <h4>주성분</h4>
+        <p class="ingredient-text" id="ingredientModalText"></p>
+        <p class="ingredient-source-note">첨부한 ‘통합 문서1(1).xlsx’의 A열(제품)·B열(주성분) 데이터를 표시합니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container footer-grid">
+      <div>
+        <strong>RoutineLab</strong><br />
+        화장품 하나가 아니라, 당신의 하루 루틴을 분석합니다.<br /><br />
+        문의/연락처: <span class="null-inline">{{C}}</span>
+      </div>
+
+      <div class="footer-links">
+        <a href="#" data-null-link="privacy">개인정보처리방침 <span class="null-inline">{{D}}</span></a>
+        <a href="#" data-null-link="terms">이용약관 <span class="null-inline">{{E}}</span></a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    /*
+      ==========================================================
+      USER-SUPPLIED CONTENT SLOTS
+      실제 콘텐츠가 준비되면 null을 값으로 교체하세요.
+      ==========================================================
+    */
+    const userContent = {
+      brandLogo: null,        // {{A}}
+      heroVisual: null,       // {{B}}
+      contactInfo: null,      // {{C}}
+      privacyPolicyUrl: null, // {{D}}
+      termsUrl: null          // {{E}}
+    };
+
+    // 첨부 엑셀(A열: 제품, B열: 주성분)을 HTML 내부 데이터로 반영
+    const ingredientDatabase = {
+      "이니스프리 비타민C 세럼": "에틸아스코빅애씨드(20,000 ppm), 정제수, 프로판다이올, 1,2-헥산다이올, 글리세린, 3-O-",
+      "닥터지 수딩크림": "글린세린, 히알루론산, 베타인",
+      "자작나무수분선크림": "징크옥사이드, 티타늄디옥사이드, 산화아연",
+      "디오디너리 나이아신아마이드+징크 세럼": "나이아신아마이드 10 %, 징크 1%",
+      "이니스프리 레티놀 그린티 PDRN 앰플": "락토바실러스발효용해물(56.88%), 글리세린, 프로판다이올, 정제수, 다이프로필렌글라이콜, 부틸렌글라이콜, 나이아신아마이드",
+      "레이어랩 판테놀 크림": "1,2-펜탄디올, 디메티콘, 디프로필렌글리콜, 라놀린, 모노앤디글리세리드"
+    };
+
+    const products = [
+      {
+        id: "am-vitc",
+        time: "AM",
+        name: "이니스프리 비타민C 세럼",
+        meta: "Ethyl Ascorbic Acid 2.0%",
+        ingredients: ["Ethyl Ascorbic Acid", "Glycerin", "Propanediol"]
+      },
+      {
+        id: "am-dr-g",
+        time: "AM",
+        name: "닥터지 수딩크림",
+        meta: "Glycerin · Hyaluronic Acid · Betaine",
+        ingredients: ["Glycerin", "Hyaluronic Acid", "Betaine"]
+      },
+      {
+        id: "am-sun",
+        time: "AM",
+        name: "자작나무 수분 선크림",
+        meta: "Zinc Oxide · Titanium Dioxide",
+        ingredients: ["Zinc Oxide", "Titanium Dioxide"]
+      },
+      {
+        id: "pm-niacinamide",
+        time: "PM",
+        name: "디오디너리 나이아신아마이드 + 징크",
+        meta: "Niacinamide 10% · Zinc PCA 1%",
+        ingredients: ["Niacinamide", "Zinc PCA"]
+      },
+      {
+        id: "pm-retinol",
+        time: "PM",
+        name: "이니스프리 레티놀 앰플",
+        meta: "Glycerin · Propanediol · Niacinamide",
+        ingredients: ["Glycerin", "Propanediol", "Niacinamide", "Retinol"]
+      },
+      {
+        id: "pm-panthenol",
+        time: "PM",
+        name: "레이어랩 판테놀 크림",
+        meta: "Dimethicone · Lanolin 등",
+        ingredients: ["Pentanediol", "Dimethicone", "Dipropylene Glycol", "Lanolin"]
+      }
+    ];
+
+    const amContainer = document.getElementById("amProducts");
+    const pmContainer = document.getElementById("pmProducts");
+    const selectionSummary = document.getElementById("selectionSummary");
+    const resultPanel = document.getElementById("resultPanel");
+    const ingredientRows = document.getElementById("ingredientRows");
+    const insightText = document.getElementById("insightText");
+    const scoreValue = document.getElementById("scoreValue");
+    const exposureValue = document.getElementById("exposureValue");
+    const confidenceValue = document.getElementById("confidenceValue");
+
+    function renderProduct(product) {
+      return `
+        <label class="product-option">
+          <input type="checkbox" value="${product.id}" checked />
+          <span>
+            <strong>${product.name}</strong>
+            <small>${product.meta}</small>
+          </span>
+          <span class="badge">${product.time}</span>
+        </label>
+      `;
+    }
+
+    products.forEach(product => {
+      if (product.time === "AM") {
+        amContainer.insertAdjacentHTML("beforeend", renderProduct(product));
+      } else {
+        pmContainer.insertAdjacentHTML("beforeend", renderProduct(product));
+      }
+    });
+
+    function getSelectedProducts() {
+      const selectedIds = [...document.querySelectorAll('.product-option input:checked')]
+        .map(input => input.value);
+      return products.filter(product => selectedIds.includes(product.id));
+    }
+
+    function updateSummary() {
+      const selected = getSelectedProducts();
+      const amCount = selected.filter(p => p.time === "AM").length;
+      const pmCount = selected.filter(p => p.time === "PM").length;
+      selectionSummary.textContent = `AM ${amCount}개 / PM ${pmCount}개 선택`;
+    }
+
+    document.addEventListener("change", event => {
+      if (event.target.matches(".product-option input")) {
+        updateSummary();
+      }
+    });
+
+    function calculateAnalysis(selected) {
+      const counts = {};
+
+      selected.forEach(product => {
+        const uniqueIngredients = [...new Set(product.ingredients)];
+        uniqueIngredients.forEach(ingredient => {
+          counts[ingredient] = (counts[ingredient] || 0) + 1;
+        });
+      });
+
+      const duplicates = Object.entries(counts)
+        .filter(([, count]) => count >= 2)
+        .sort((a, b) => b[1] - a[1]);
+
+      const maxDuplicate = duplicates.length ? Math.max(...duplicates.map(([, count]) => count)) : 1;
+
+      let exposure = "낮음";
+      if (maxDuplicate >= 3) exposure = "높음";
+      else if (maxDuplicate === 2) exposure = "보통";
+
+      // 데모용 휴리스틱: 선택 제품 수와 중복 수에 따라 단순 조정
+      let score = 92 - Math.max(0, duplicates.length - 1) * 2;
+      score = Math.max(70, Math.min(96, score));
+
+      // 레티놀 제품의 정확한 제품/농도 정보가 불완전하다는 문서 가정 반영
+      const hasRetinolDemo = selected.some(p => p.id === "pm-retinol");
+      const confidence = hasRetinolDemo ? "중간" : "높음";
+
+      return { counts, duplicates, exposure, score, confidence };
+    }
+
+    function exposureLabel(count) {
+      if (count >= 3) return "높음";
+      if (count === 2) return "보통";
+      return "낮음";
+    }
+
+    function renderResult() {
+      const selected = getSelectedProducts();
+
+      if (selected.length === 0) {
+        alert("분석할 제품을 최소 1개 선택해주세요.");
+        return;
+      }
+
+      const result = calculateAnalysis(selected);
+
+      scoreValue.textContent = `${result.score} / 100`;
+      exposureValue.textContent = result.exposure;
+      confidenceValue.textContent = result.confidence;
+
+      ingredientRows.innerHTML = "";
+
+      const rows = Object.entries(result.counts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 8);
+
+      rows.forEach(([ingredient, count]) => {
+        const interpretation = count >= 2
+          ? "여러 제품에서 반복 확인"
+          : "현재 선택 루틴에서 단일 노출원";
+
+        ingredientRows.insertAdjacentHTML("beforeend", `
+          <tr>
+            <td><strong>${ingredient}</strong></td>
+            <td>${count}</td>
+            <td>${exposureLabel(count)}</td>
+            <td>${interpretation}</td>
+          </tr>
+        `);
+      });
+
+      if (result.duplicates.length) {
+        const names = result.duplicates.map(([name]) => name).join(", ");
+        insightText.textContent =
+          `현재 선택한 루틴에서는 ${names} 성분이 여러 제품에서 반복됩니다. ` +
+          `이 결과는 위해성 판정이 아니라 루틴 내 중복 정도를 보여주는 데모 지표입니다. ` +
+          `정확한 농도와 제품 정보가 없는 항목은 보수적으로 해석해야 합니다.`;
+      } else {
+        insightText.textContent =
+          "현재 선택한 제품에서는 동일 성분의 반복이 크게 확인되지 않았습니다. " +
+          "다만 본 데모는 제한된 주요 성분 데이터를 사용하므로 실제 안전성 판정을 의미하지 않습니다.";
+      }
+
+      resultPanel.classList.add("show");
+      resultPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    document.getElementById("analyzeButton").addEventListener("click", renderResult);
+
+    document.querySelectorAll("[data-scroll]").forEach(button => {
+      button.addEventListener("click", () => {
+        const target = document.querySelector(button.dataset.scroll);
+        if (target) target.scrollIntoView({ behavior: "smooth" });
+      });
+    });
+
+    const menuButton = document.getElementById("menuButton");
+    const navLinks = document.getElementById("navLinks");
+
+    menuButton.addEventListener("click", () => {
+      navLinks.classList.toggle("open");
+    });
+
+    navLinks.querySelectorAll("a").forEach(link => {
+      link.addEventListener("click", () => navLinks.classList.remove("open"));
+    });
+
+    // PROBLEM 영역: 엑셀 제품 데이터 기반 주성분 팝업 + 제품 추가
+    const ingredientModal = document.getElementById("ingredientModal");
+    const ingredientModalTitle = document.getElementById("ingredientModalTitle");
+    const ingredientModalText = document.getElementById("ingredientModalText");
+    const ingredientModalClose = document.getElementById("ingredientModalClose");
+    const newProblemProduct = document.getElementById("newProblemProduct");
+    const addProblemProductButton = document.getElementById("addProblemProductButton");
+    const productSuggestions = document.getElementById("productSuggestions");
+    const addProductMessage = document.getElementById("addProductMessage");
+    const addProductBox = document.getElementById("addProductBox");
+    const problemQuestion = document.getElementById("problemQuestion");
+
+    Object.keys(ingredientDatabase).forEach(productName => {
+      const option = document.createElement("option");
+      option.value = productName;
+      productSuggestions.appendChild(option);
+    });
+
+    function indexToProductLabel(index) {
+      // A~Z 이후에도 AA, AB...로 확장
+      let n = index + 1;
+      let label = "";
+      while (n > 0) {
+        n -= 1;
+        label = String.fromCharCode(65 + (n % 26)) + label;
+        n = Math.floor(n / 26);
+      }
+      return `제품 ${label}`;
+    }
+
+    function updateProblemProductLabels() {
+      const cards = [...document.querySelectorAll("[data-problem-product]")];
+
+      cards.forEach((card, index) => {
+        const labelEl = card.querySelector(".problem-product-label");
+        if (labelEl) labelEl.textContent = indexToProductLabel(index);
+      });
+
+      if (problemQuestion) {
+        if (cards.length === 0) {
+          problemQuestion.textContent = "사용 중인 제품을 추가하면 어떤 조합인지 확인할 수 있습니다.";
+        } else {
+          const labels = cards.map((_, index) => indexToProductLabel(index).replace("제품 ", ""));
+          problemQuestion.textContent = `${labels.join(" + ")}를 함께 사용하면?`;
+        }
+      }
+    }
+
+    function openIngredientModal(productName) {
+      const ingredientText = ingredientDatabase[productName];
+      ingredientModalTitle.textContent = productName;
+      ingredientModalText.textContent = ingredientText || "첨부 엑셀 데이터에서 해당 제품의 주성분 정보를 찾지 못했습니다.";
+      ingredientModal.classList.add("show");
+      document.body.classList.add("modal-open");
+      ingredientModalClose.focus();
+    }
+
+    function closeIngredientModal() {
+      ingredientModal.classList.remove("show");
+      document.body.classList.remove("modal-open");
+    }
+
+    document.addEventListener("click", event => {
+      const ingredientButton = event.target.closest("[data-show-ingredients]");
+      if (ingredientButton) {
+        openIngredientModal(ingredientButton.dataset.showIngredients);
+        return;
+      }
+
+      const deleteButton = event.target.closest("[data-delete-product]");
+      if (deleteButton) {
+        const card = deleteButton.closest("[data-problem-product]");
+        if (card) {
+          const deletedName = card.dataset.problemProduct;
+          card.remove();
+          updateProblemProductLabels();
+          addProductMessage.textContent = `‘${deletedName}’ 제품을 삭제했습니다.`;
+        }
+      }
+    });
+
+    ingredientModalClose.addEventListener("click", closeIngredientModal);
+
+    ingredientModal.addEventListener("click", event => {
+      if (event.target === ingredientModal) closeIngredientModal();
+    });
+
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && ingredientModal.classList.contains("show")) {
+        closeIngredientModal();
+      }
+    });
+
+    function addProblemProduct() {
+      const productName = newProblemProduct.value.trim();
+      addProductMessage.textContent = "";
+
+      if (!productName) {
+        addProductMessage.textContent = "추가할 제품명을 입력해주세요.";
+        newProblemProduct.focus();
+        return;
+      }
+
+      const alreadyExists = [...document.querySelectorAll("[data-problem-product]")]
+        .some(card => card.dataset.problemProduct === productName);
+
+      if (alreadyExists) {
+        addProductMessage.textContent = "이미 화면에 추가된 제품입니다.";
+        return;
+      }
+
+      const isSearchable = Object.prototype.hasOwnProperty.call(ingredientDatabase, productName);
+      const card = document.createElement("div");
+      card.className = "product-search-card card added-product-card";
+      card.dataset.problemProduct = productName;
+
+      const content = document.createElement("div");
+      const title = document.createElement("strong");
+
+      const labelSpan = document.createElement("span");
+      labelSpan.className = "problem-product-label";
+      labelSpan.textContent = "제품";
+      const nameSpan = document.createElement("span");
+      nameSpan.className = "problem-product-name";
+      nameSpan.textContent = productName;
+
+      title.append(labelSpan, document.createTextNode(" · "), nameSpan);
+
+      const description = document.createElement("span");
+      description.textContent = isSearchable
+        ? "엑셀 데이터의 주성분 정보 확인"
+        : "엑셀에 주성분 정보가 없는 사용자 입력 제품";
+      content.append(title, description);
+
+      const actions = document.createElement("div");
+      actions.className = "product-card-actions";
+
+      const searchButton = document.createElement("button");
+      searchButton.type = "button";
+      searchButton.className = "ingredient-search-button";
+      searchButton.textContent = isSearchable ? "검색 가능" : "정보 없음";
+      searchButton.dataset.showIngredients = productName;
+
+      const deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.className = "product-delete-button";
+      deleteButton.textContent = "삭제";
+      deleteButton.setAttribute("data-delete-product", "");
+
+      actions.append(searchButton, deleteButton);
+      card.append(content, actions);
+      addProductBox.insertAdjacentElement("beforebegin", card);
+      updateProblemProductLabels();
+
+      addProductMessage.textContent = isSearchable
+        ? "제품을 추가했습니다. ‘검색 가능’ 버튼을 눌러 주성분을 확인하세요."
+        : "제품을 추가했습니다. 현재 첨부 엑셀에는 이 제품의 주성분 정보가 없습니다.";
+      newProblemProduct.value = "";
+    }
+
+    addProblemProductButton.addEventListener("click", addProblemProduct);
+    newProblemProduct.addEventListener("keydown", event => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        addProblemProduct();
+      }
+    });
+
+    // null 링크 클릭 방지
+    document.querySelectorAll("[data-null-link]").forEach(link => {
+      link.addEventListener("click", event => {
+        event.preventDefault();
+      });
+    });
+
+    updateProblemProductLabels();
+    updateSummary();
+  </script>
+</body>
+</html>
